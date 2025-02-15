@@ -8,6 +8,8 @@ import attendanceRoutes from './routes/attendanceRoutes.js';
 import cron from 'node-cron';
 import { sendAttendanceReminder, sendAbsenceNotification } from './services/notificationService.js';
 import NotificationService from './services/notificationService.js';
+import User from './models/User.js';
+import Attendance from './models/attendance.js';
 
 dotenv.config();
 
