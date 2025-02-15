@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@mui/material": "^5.0.0",
+    "@mui/x-date-pickers": "^6.0.0",
+    "chart.js": "^4.0.0",
+    "react-chartjs-2": "^5.0.0",
+    "date-fns": "^2.30.0"
+  }
+}
