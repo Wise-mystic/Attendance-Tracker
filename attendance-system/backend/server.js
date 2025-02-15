@@ -7,7 +7,7 @@ import userRoutes from './routes/userRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
 import cron from 'node-cron';
 import { sendAttendanceReminder, sendAbsenceNotification } from './services/notificationService.js';
-import NotificationService from './services/notificationService';
+import NotificationService from './services/notificationService.js';
 
 dotenv.config();
 
@@ -80,7 +80,7 @@ cron.schedule('0 0 * * *', async () => {
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 

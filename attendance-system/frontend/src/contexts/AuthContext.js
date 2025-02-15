@@ -77,3 +77,79 @@ export const useAuth = () => {
     }
     return context;
 }; 
+
+const navigation = () => {
+    const{user, logout} = useAuth();
+    const navigate = useNavigate();
+const [anchorEl, setAnchorEl] = React.useState(null);
+
+const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+};
+
+const handleClose = () => {
+    setAnchorEl(null);
+};
+const handleProfile = () => {
+    handleClose();
+    navigate('/profile');
+};  
+
+const handleLogout = () => {
+    handleClose();
+    logout();
+    navigate('/login');
+};
+
+const getDashboardPath = () => {
+    switch (user.role) {
+        case 'Admin':
+            return '/admin-dashboard';
+        case 'Leader':
+            return '/leader-dashboard';
+            case 'Member':
+                return '/member-dashboard';
+                default:
+                    return '/';
+            
+    }
+};
+
+return (
+    <AppBar position="static">
+        <Toolbar>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                Attendance System
+            </Typography>
+            {user && (
+                <>
+                <Button
+                color="inherit"
+                onClick={() => navigate(getDashboardPath())}
+                >
+                    Dashboard
+                </Button>
+               {
+                user.role === 'leader' &&(
+                    <Button
+                    color="inherit"
+                onclick = {() => navigate('/mark-attendance')}
+                >
+                    Mark Attendance
+                </Button>
+                )}
+                <NotificationCenter />
+                <IconButton 
+                size="large"
+                color="inherit"
+                >
+                    <Notifications />
+                </IconButton>
+                </>
+            )}
+        </Toolbar>
+    </AppBar>
+);
+};
+
+export default navigation;

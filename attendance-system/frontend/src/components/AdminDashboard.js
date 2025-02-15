@@ -30,7 +30,7 @@ const AdminDashboard = () => {
 
     const fetchAnalytics = async () => {
         try {
-            const data = await get(`/attendance/analytics/admin?startDate=${dateRange.startDate.toISOString()}&endDate=${dateRange.endDate.toISOString()}&group=${selectedGroup}`);
+            const data = await get('/analytics/admin');
             setAnalytics(data);
         } catch (error) {
             console.error('Error fetching analytics:', error);
@@ -81,7 +81,7 @@ const AdminDashboard = () => {
                 <Grid item xs={12} md={4}>
                     <Paper sx={{ p: 2 }}>
                         <Typography variant="h6">Overall Attendance Rate</Typography>
-                        <Typography variant="h4">{analytics.overallStats.attendanceRate.toFixed(1)}%</Typography>
+                        <Typography variant="h4">{analytics.overallRate}%</Typography>
                     </Paper>
                 </Grid>
             </Grid>

@@ -1,4 +1,36 @@
 import User from '../models/User.js';
+import jwt from 'jsonwebtoken';
+
+export const checkAuth = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Authentication required' });
+    }
+    try{
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.status(401).json({ message: 'Invalid token' });
+        next(error);
+    }
+};
+
+
+export const isAdmin = (req, res, next) => {
+    if (req.user.role !== 'Admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+    }
+    next();
+};
+
+export const isLeader = (req, res, next) => {
+    if (req.user.role !== 'Leader') {
+        return res.status(403).json({ message: 'Leader access required' });
+    }
+    next();
+};  
+
 
 export const canManageGroup = async (req, res, next) => {
     try {

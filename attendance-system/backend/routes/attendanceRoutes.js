@@ -2,8 +2,7 @@ import express from 'express';
 import Attendance from '../models/attendance.js';
 import User from '../models/User.js';
 import { checkAuth, isAdmin } from '../middleware/authMiddleware.js';
-import { getAllAttendance, getAttendanceById, createAttendance, updateAttendance, deleteAttendance } from '../controllers/attendanceController.js';
-import { markAttendance, getAttendanceByDateRange, getUnmarkedAttendance } from '../controllers/attendanceController.js';
+import { getAllAttendance, getAttendanceById, createAttendance,getUserAttendanceSummary, getUserAttendanceRecords, getAllAttendanceSummary,  markAttendance, getAttendanceByDateRange, getUnmarkedAttendance, getAdminAnalytics, getLeaderAnalytics } from '../controllers/attendanceController.js';
 
 const router = express.Router();
 
@@ -28,10 +27,10 @@ router.get('/:id', checkAuth, isAdmin, getAttendanceById);
 router.post('/', checkAuth, isAdmin, createAttendance);
 
 // Update an attendance record
-router.put('/:id', checkAuth, isAdmin, updateAttendance);
+// router.put('/:id', checkAuth, isAdmin, updateAttendance);
 
 // Delete an attendance record
-router.delete('/:id', checkAuth, isAdmin, deleteAttendance);
+// router.delete('/:id', checkAuth, isAdmin, deleteAttendance);
 
 // Get attendance summary for a user
 router.get('/:userId/summary', checkAuth, getUserAttendanceSummary);
@@ -43,7 +42,7 @@ router.get('/:userId', checkAuth, getUserAttendanceRecords);
 router.get('/summary', checkAuth, isAdmin, getAllAttendanceSummary);
 
 // Get attendance records for all users
-router.get('/', checkAuth, isAdmin, getAllAttendanceRecords);
+router.get('/', checkAuth, isAdmin, getAllAttendance);
 
 // Get attendance summary for a user
 router.get('/:userId/summary', checkAuth, getUserAttendanceSummary);
@@ -55,7 +54,7 @@ router.get('/:userId', checkAuth, getUserAttendanceRecords);
 router.get('/summary', checkAuth, isAdmin, getAllAttendanceSummary);
 
 // Get attendance records for all users
-router.get('/', checkAuth, isAdmin, getAllAttendanceRecords);   
+router.get('/allAttendance', checkAuth, isAdmin, getAllAttendance);
 
 // Mark attendance for a user
 router.post('/:userId/mark', checkAuth, markAttendance);

@@ -15,40 +15,36 @@ import useApi from '../hooks/useApi';
 import LoadingSpinner from './LoadingSpinner';
 
 const LeaderDashboard = () => {
-    const [analytics, setAnalytics] = useState(null);
-    const [dateRange, setDateRange] = useState({
-        startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)),
-        endDate: new Date()
-    });
+    const [groupData, setGroupData] = useState(null);
+    const { get } = useApi();
     const { user } = useAuth();
     const navigate = useNavigate();
-    const { loading, error, get } = useApi();
 
     useEffect(() => {
-        fetchLeaderAnalytics();
-    }, [dateRange]);
+        fetchGroupData();
+    }, []);
 
-    const fetchLeaderAnalytics = async () => {
+    const fetchGroupData = async () => {
         try {
-            const data = await get(`/attendance/analytics/leader?startDate=${dateRange.startDate.toISOString()}&endDate=${dateRange.endDate.toISOString()}`);
-            setAnalytics(data);
+            const data = await get('/analytics/leader');
+            setGroupData(data);
         } catch (error) {
-            console.error('Error fetching leader analytics:', error);
+            console.error('Error fetching group data:', error);
         }
     };
 
     const memberColumns = [
         { field: 'name', headerName: 'Name' },
         { field: 'email', headerName: 'Email' },
-        { 
-            field: 'attendanceRate', 
+        {
+            field: 'attendanceRate',
             headerName: 'Attendance Rate',
             align: 'right',
             renderCell: (row) => `${row.attendanceRate?.toFixed(1)}%`
         }
     ];
 
-    if (loading || !analytics) return <LoadingSpinner message="Loading analytics..." />;
+    if (!groupData) return <LoadingSpinner message="Loading group data..." />;
 
     return (
         <Box sx={{ p: 3 }}>
@@ -69,20 +65,27 @@ const LeaderDashboard = () => {
                     </Button>
                 </Grid>
             </Grid>
-
+            Mark Today's Attendance
             <DateRangePicker
-                dateRange={dateRange}
-                onDateChange={setDateRange}
+                dateRange={groupData.dateRange}
+                onDateChange={(newDateRange) => {
+                    setGroupData(prevState => ({
+                        ...prevState,
+                        dateRange: newDateRange
+                    }));
+                    fetchGroupData();
+                }}
                 title="Analytics Period"
             />
 
+            title="Analytics Period"
             <Paper sx={{ p: 2, mb: 3 }}>
                 <Typography variant="h6" gutterBottom>
                     Weekly Attendance Trends
                 </Typography>
                 <Box sx={{ height: 400 }}>
                     <AttendanceChart
-                        data={analytics.weeklyTrends}
+                        data={groupData.weeklyTrends}
                         title="Weekly Attendance Rate"
                     />
                 </Box>
@@ -91,7 +94,7 @@ const LeaderDashboard = () => {
             <DataTable
                 title="Member Attendance Rates"
                 columns={memberColumns}
-                data={analytics.memberAttendance}
+                data={groupData.memberAttendance}
                 searchable={true}
                 sortable={true}
             />
