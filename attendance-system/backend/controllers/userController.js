@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -7,26 +8,40 @@ dotenv.config();
 
 // Register a new user
 
-export const registerUser = async (req, res, next) => {
+export const registerUser = async (req, res) => {
     try {
         const { name, email, phone, password, role, dayGroup } = req.body;
 
-        // Check if user already exists
-        const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
-        if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
+        // Check if user exists by email
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'Email already registered' });
+        }
+
+        // Check if user exists by phone
+        const existingPhone = await User.findOne({ phone });
+        if (existingPhone) {
+            return res.status(400).json({ message: 'Phone number already registered' });
         }
 
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create new user
-        const newUser = new User({ name, email, phone, password: hashedPassword, role, dayGroup });
-        await newUser.save();
+        const newUser = new User({
+            name,
+            email,
+            phone,
+            password: hashedPassword,
+            role,
+            dayGroup
+        });
 
-        res.status(201).json({ message: 'User registered successfully' });
+        await newUser.save();
+        res.status(201).json({ message: 'Registration successful. Please login.' });
     } catch (error) {
-        next(error);
+        console.error('Registration error:', error);
+        res.status(500).json({ message: 'Registration failed. Please try again.' });
     }
 };
 
@@ -85,15 +100,8 @@ export const loginUser = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Login Error:', {
-            error: error.message,
-            stack: error.stack,
-            input: { email: email?.substring(0, 3) + '***' }
-        });
-        return res.status(500).json({ 
-            message: 'Authentication failed',
-            code: 'AUTH_ERROR'
-        });
+        console.error('Login error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 };
 

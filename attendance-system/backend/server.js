@@ -17,6 +17,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use('/api', userRoutes);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 // Reminder cron job - runs every hour to check for reminders
 cron.schedule('0 * * * *', async () => {
     const now = new Date();
@@ -90,5 +95,5 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
 app.use('/api/users', userRoutes);
 app.use('/api/attendance', attendanceRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// const PORT = process.env.PORT || 5000;
+// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
