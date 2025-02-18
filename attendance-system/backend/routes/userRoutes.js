@@ -7,13 +7,13 @@ import { registerUser, loginUser, getAllUsers, getUserById, updateUser, deleteUs
 
 const router = express.Router();
 
-router.post('/register', registerUser);
-router.post('/login', loginUser);
-router.get('/users', checkAuth, isAdmin, getAllUsers);
-router.get('/users/:userId', checkAuth, isAdmin, getUserById);
-router.put('/users/:userId', checkAuth, isAdmin, updateUser);
-router.delete('/users/:userId', checkAuth, isAdmin, deleteUser);
-router.get('/users/:userId/attendance', checkAuth, getUserAttendanceSummary);
+router.post('/api/register', registerUser);
+router.post('/api/login', loginUser);
+router.get('/api/users', checkAuth, isAdmin, getAllUsers);
+router.get('/api/users/:userId', checkAuth, isAdmin, getUserById);
+router.put('/api/users/:userId', checkAuth, isAdmin, updateUser);
+router.delete('/api/users/:userId', checkAuth, isAdmin, deleteUser);
+router.get('/api/users/:userId/attendance', checkAuth, getUserAttendanceSummary);
 
 export default router;
 

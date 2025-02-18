@@ -30,42 +30,111 @@ export const registerUser = async (req, res, next) => {
     }
 };
 
-// Login user       
+
+// @route POST /api/login
 export const loginUser = async (req, res) => {
-    console.log('Login attempt:', req.body); // Log incoming request
     const { email, password } = req.body;
     
     try {
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required' });
+        // Validate input format
+        if (!email?.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            return res.status(400).json({ message: 'Invalid email format' });
         }
 
-        const user = await User.findOne({ email });
-        console.log('User found:', user ? 'Yes' : 'No'); // Log if user was found
+        // Check database connection
+        if (mongoose.connection.readyState !== 1) {
+            console.error('Database connection not ready');
+            return res.status(503).json({ message: 'Service unavailable' });
+        }
 
+        const user = await User.findOne({ email }).select('+password');
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        const isValidPassword = await bcrypt.compare(password, user.password);
-        console.log('Password valid:', isValidPassword); // Log password validation result
-
-        if (!isValidPassword) {
+        // Password validation with timing safety
+        const isValid = await bcrypt.compare(password, user.password);
+        if (!isValid) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
+        // JWT_SECRET check
+        if (!process.env.JWT_SECRET) {
+            console.error('JWT_SECRET not configured');
+            return res.status(500).json({ message: 'Server configuration error' });
+        }
+
         const token = jwt.sign(
-            { id: user._id, role: user.role }, 
-            process.env.JWT_SECRET, 
+            { 
+                id: user._id,
+                role: user.role,
+                iss: 'attendance-system',
+                aud: 'client-app'
+            },
+            process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
-        
-        return res.json({ token });
+
+        return res.json({ 
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                role: user.role
+            }
+        });
+
     } catch (error) {
-        console.error('Login error details:', error); // Detailed error logging
-        return res.status(500).json({ message: error.message || 'Internal server error' });
+        console.error('Login Error:', {
+            error: error.message,
+            stack: error.stack,
+            input: { email: email?.substring(0, 3) + '***' }
+        });
+        return res.status(500).json({ 
+            message: 'Authentication failed',
+            code: 'AUTH_ERROR'
+        });
     }
 };
+
+
+// // Login user       
+// export const loginUser = async (req, res, next) => {
+    
+//     console.log('Login attempt:', req.body); // Log incoming request
+//     const { email, password } = req.body;
+    
+//     try {
+//         if (!email || !password) {
+//             return res.status(400).json({ message: 'Email and password are required' });
+//         }
+
+//         const user = await User.findOne({ email });
+//         console.log('User found:', user ? 'Yes' : 'No'); // Log if user was found
+
+//         if (!user) {
+//             return res.status(401).json({ message: 'Invalid credentials' });
+//         }
+
+//         const isValidPassword = await bcrypt.compare(password, user.password);
+//         console.log('Password valid:', isValidPassword); // Log password validation result
+
+//         if (!isValidPassword) {
+//             return res.status(401).json({ message: 'Invalid credentials' });
+//         }
+
+//         const token = jwt.sign(
+//             { id: user._id, role: user.role }, 
+//             process.env.JWT_SECRET, 
+//             { expiresIn: '1h' }
+//         );
+        
+//         return res.json({ token });
+//     } catch (error) {
+//         console.error('Login error details:', error); // Detailed error logging
+//         return res.status(500).json({ message: error.message || 'Internal server error' });
+//     }
+// };
 
 // Get all users
 export const getAllUsers = async (req, res, next) => {
