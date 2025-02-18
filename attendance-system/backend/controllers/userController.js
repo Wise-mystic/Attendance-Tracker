@@ -32,15 +32,25 @@ export const loginUser = async (req, res, next) => {
     const { email, password } = req.body;
     try {
         const user = await User.findOne({ email });
-        if (user && bcrypt.compareSync(password, user.password)) {
-            const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-            res.json({ token });
-        } else {
-            res.status(401).json({ message: 'Invalid credentials' });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid credentials' });
         }
+
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign(
+            { id: user._id, role: user.role }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '1h' }
+        );
+        
+        return res.json({ token });
     } catch (error) {
-        next(error);
-        res.status(400).json({ error: error.message });
+        console.error('Login error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 };
 
