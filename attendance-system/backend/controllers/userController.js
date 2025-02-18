@@ -1,6 +1,9 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Register a new user
 
@@ -28,15 +31,25 @@ export const registerUser = async (req, res, next) => {
 };
 
 // Login user       
-export const loginUser = async (req, res, next) => {
+export const loginUser = async (req, res) => {
+    console.log('Login attempt:', req.body); // Log incoming request
     const { email, password } = req.body;
+    
     try {
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
+
         const user = await User.findOne({ email });
+        console.log('User found:', user ? 'Yes' : 'No'); // Log if user was found
+
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
         const isValidPassword = await bcrypt.compare(password, user.password);
+        console.log('Password valid:', isValidPassword); // Log password validation result
+
         if (!isValidPassword) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
@@ -49,8 +62,8 @@ export const loginUser = async (req, res, next) => {
         
         return res.json({ token });
     } catch (error) {
-        console.error('Login error:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        console.error('Login error details:', error); // Detailed error logging
+        return res.status(500).json({ message: error.message || 'Internal server error' });
     }
 };
 
